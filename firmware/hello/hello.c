@@ -30,19 +30,6 @@ void clear_gpio(int pin)
 
 void main()
 {
-    // Configure LA probes as outputs from the cpu
-    reg_la0_oenb = reg_la0_iena = 0xFFFFFFFF;    // [31:0]
-    reg_la1_oenb = reg_la1_iena = 0xFFFFFFFF;    // [63:32]
-    reg_la2_oenb = reg_la2_iena = 0xFFFFFFFF;    // [95:64]
-    reg_la3_oenb = reg_la3_iena = 0xFFFFFFFF;    // [127:96]
-
-    // configure the IO direction through LA probe
-    // 0=output, 1=input
-    reg_la0_data = 0x0001FFFF; // 0000_0000_0000_0001_1111_1111_1111_1111
-    reg_la1_data = 0x0000000C; // 0000_0000_0000_0000_0000_0000_0000_1100
-    reg_la2_data = 0x00000000;
-    reg_la3_data = 0x00000000; // note: la_data[96] is the clk/reset select signal
-
 	// Important note!  GPIOs 1 to 4 have a reversed bit for
     // management disable that requires swapping the values
     // for "USER" and "MGMT" for these four pins.  Normally, use
@@ -65,63 +52,63 @@ void main()
     // #define GPIO_MODE_MGMT_STD_OUT_MONITORED   0x1802
     // #define GPIO_MODE_MGMT_STD_ANALOG          0x000a
     // --------------------------------------------------
-    reg_mprj_io_0  = 0x1c03; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[0]
-    reg_mprj_io_1  = 0x1e01; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[1]
-    reg_mprj_io_2  = 0x0f00; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[2]
-    reg_mprj_io_3  = 0x0780; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[3]
-    reg_mprj_io_4  = 0x03c0; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[4]
-    reg_mprj_io_5  = 0x01e0; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[5]
-    reg_mprj_io_6  = 0x00f0; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[6]
-    reg_mprj_io_7  = 0x0078; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[7]
-    reg_mprj_io_8  = 0x003c; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[8]
-    reg_mprj_io_9  = 0x001e; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[9]
-    reg_mprj_io_10 = 0x100f; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[10]
-    reg_mprj_io_11 = 0x1807; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[11]
-    reg_mprj_io_12 = 0x1c03; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[12]
-    reg_mprj_io_13 = 0x1e01; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[13]
-    reg_mprj_io_14 = 0x0f00; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[14]
-    reg_mprj_io_15 = 0x1380; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[15]
-    reg_mprj_io_16 = 0x0980; // [slippage fix-14USER] Input - glb2io_1_X00_Y00
-    reg_mprj_io_17 = 0x00c0; // [slippage fix-14USER] Output - io2glb_16_X01_Y00[0]
-    reg_mprj_io_18 = 0x0000; // [slippage fix-14USER] Output - io2glb_16_X01_Y00[1]
-    // reg_mprj_io_0  = 0x0403; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[0]
-    // reg_mprj_io_1  = 0x1201; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[1]
-    // reg_mprj_io_2  = 0x0900; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[2]
-    // reg_mprj_io_3  = 0x0480; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[3]
-    // reg_mprj_io_4  = 0x03c0; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[4]
-    // reg_mprj_io_5  = 0x01e0; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[5]
-    // reg_mprj_io_6  = 0x00f0; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[6]
-    // reg_mprj_io_7  = 0x0078; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[7]
-    // reg_mprj_io_8  = 0x003c; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[8]
-    // reg_mprj_io_9  = 0x001e; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[9]
-    // reg_mprj_io_10 = 0x100f; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[10]
-    // reg_mprj_io_11 = 0x1807; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[11]
-    // reg_mprj_io_12 = 0x1c03; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[12]
-    // reg_mprj_io_13 = 0x1e01; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[13]
-    // reg_mprj_io_14 = 0x0f00; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[14]
-    // reg_mprj_io_15 = 0x1380; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[15]
-    // reg_mprj_io_16 = 0x0980; // [slippage fix-14MGMT] Input - glb2io_1_X00_Y00
-    // reg_mprj_io_17 = 0x00c0; // [slippage fix-14MGMT] Output - io2glb_16_X01_Y00[0]
-    // reg_mprj_io_18 = 0x0000; // [slippage fix-14MGMT] Output - io2glb_16_X01_Y00[1]
-    reg_mprj_io_19 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[2]
-    reg_mprj_io_20 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[3]
-    reg_mprj_io_21 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[4]
-    reg_mprj_io_22 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[5]
-    reg_mprj_io_23 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[6]
-    reg_mprj_io_24 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[7]
-    reg_mprj_io_25 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[8]
-    reg_mprj_io_26 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[9]
-    reg_mprj_io_27 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[10]
-    reg_mprj_io_28 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[11]
-    reg_mprj_io_29 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[12]
-    reg_mprj_io_30 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[13]
-    reg_mprj_io_31 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[14]
-    reg_mprj_io_32 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_16_X01_Y00[15]
-    reg_mprj_io_33 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - io2glb_1_X01_Y00
-    reg_mprj_io_34 = GPIO_MODE_MGMT_STD_INPUT_NOPULL; // Input - io_clk
-    reg_mprj_io_35 = GPIO_MODE_MGMT_STD_INPUT_NOPULL; // Input - io_reset
-    reg_mprj_io_36 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - message[0]
-    reg_mprj_io_37 = GPIO_MODE_MGMT_STD_OUTPUT; // Output - message[1]
+    //reg_mprj_io_0  = 0x1c03; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[0]
+    //reg_mprj_io_1  = 0x1e01; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[1]
+    //reg_mprj_io_2  = 0x0f00; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[2]
+    //reg_mprj_io_3  = 0x0780; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[3]
+    //reg_mprj_io_4  = 0x03c0; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[4]
+    //reg_mprj_io_5  = 0x01e0; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[5]
+    //reg_mprj_io_6  = 0x00f0; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[6]
+    //reg_mprj_io_7  = 0x0078; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[7]
+    //reg_mprj_io_8  = 0x003c; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[8]
+    //reg_mprj_io_9  = 0x001e; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[9]
+    //reg_mprj_io_10 = 0x100f; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[10]
+    //reg_mprj_io_11 = 0x1807; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[11]
+    //reg_mprj_io_12 = 0x1c03; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[12]
+    //reg_mprj_io_13 = 0x1e01; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[13]
+    //reg_mprj_io_14 = 0x0f00; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[14]
+    //reg_mprj_io_15 = 0x1380; // [slippage fix-14USER] Input - glb2io_16_X00_Y00[15]
+    //reg_mprj_io_16 = 0x0980; // [slippage fix-14USER] Input - glb2io_1_X00_Y00
+    //reg_mprj_io_17 = 0x00c0; // [slippage fix-14USER] Output - io2glb_16_X01_Y00[0]
+    //reg_mprj_io_18 = 0x0000; // [slippage fix-14USER] Output - io2glb_16_X01_Y00[1]
+    reg_mprj_io_0  = 0x0403; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[0]
+    reg_mprj_io_1  = 0x1201; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[1]
+    reg_mprj_io_2  = 0x0900; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[2]
+    reg_mprj_io_3  = 0x0480; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[3]
+    reg_mprj_io_4  = 0x03c0; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[4]
+    reg_mprj_io_5  = 0x01e0; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[5]
+    reg_mprj_io_6  = 0x00f0; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[6]
+    reg_mprj_io_7  = 0x0078; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[7]
+    reg_mprj_io_8  = 0x003c; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[8]
+    reg_mprj_io_9  = 0x001e; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[9]
+    reg_mprj_io_10 = 0x100f; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[10]
+    reg_mprj_io_11 = 0x1807; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[11]
+    reg_mprj_io_12 = 0x1c03; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[12]
+    reg_mprj_io_13 = 0x1e01; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[13]
+    reg_mprj_io_14 = 0x0f00; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[14]
+    reg_mprj_io_15 = 0x1380; // [slippage fix-14MGMT] Input - glb2io_16_X00_Y00[15]
+    reg_mprj_io_16 = 0x0980; // [slippage fix-14MGMT] Input - glb2io_1_X00_Y00
+    reg_mprj_io_17 = 0x00c0; // [slippage fix-14MGMT] Output - io2glb_16_X01_Y00[0]
+    reg_mprj_io_18 = 0x0000; // [slippage fix-14MGMT] Output - io2glb_16_X01_Y00[1]
+    reg_mprj_io_19 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[2]
+    reg_mprj_io_20 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[3]
+    reg_mprj_io_21 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[4]
+    reg_mprj_io_22 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[5]
+    reg_mprj_io_23 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[6]
+    reg_mprj_io_24 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[7]
+    reg_mprj_io_25 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[8]
+    reg_mprj_io_26 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[9]
+    reg_mprj_io_27 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[10]
+    reg_mprj_io_28 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[11]
+    reg_mprj_io_29 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[12]
+    reg_mprj_io_30 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[13]
+    reg_mprj_io_31 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[14]
+    reg_mprj_io_32 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_16_X01_Y00[15]
+    reg_mprj_io_33 = GPIO_MODE_USER_STD_OUTPUT; // Output - io2glb_1_X01_Y00
+    reg_mprj_io_34 = GPIO_MODE_USER_STD_INPUT_NOPULL; // Input - io_clk
+    reg_mprj_io_35 = GPIO_MODE_USER_STD_INPUT_NOPULL; // Input - io_reset
+    reg_mprj_io_36 = GPIO_MODE_USER_STD_OUTPUT; // Output - message[0]
+    reg_mprj_io_37 = GPIO_MODE_USER_STD_OUTPUT; // Output - message[1]
     
     // Enable UART transmission
     // reg_mprj_io_6 = 0x7ff;
@@ -133,6 +120,20 @@ void main()
     reg_mprj_datah = 0x00000000; // set mprj_io[37:32] through management SoC (IO has to be GPIO_MODE_MGMT*)
     reg_mprj_xfer = 1;
     while (reg_mprj_xfer == 1);
+
+    // Configure LA probes as outputs from the cpu
+    reg_la0_oenb = reg_la0_iena = 0xFFFFFFFF;    // [31:0]
+    reg_la1_oenb = reg_la1_iena = 0xFFFFFFFF;    // [63:32]
+    reg_la2_oenb = reg_la2_iena = 0xFFFFFFFF;    // [95:64]
+    reg_la3_oenb = reg_la3_iena = 0xFFFFFFFF;    // [127:96]
+
+    // configure the IO direction through LA probe
+    // 0=output, 1=input
+    reg_la0_data = 0x0001FFFF; // 0000_0000_0000_0001_1111_1111_1111_1111
+    reg_la1_data = 0x0000000C; // 0000_0000_0000_0000_0000_0000_0000_1100
+    reg_la2_data = 0x00000000;
+    reg_la3_data = 0x00000000; // note: la_data[96] is the clk/reset select signal
+
 
     // Enable GPIO (all output, ena = 0)
 	reg_gpio_ena = 0x0;
