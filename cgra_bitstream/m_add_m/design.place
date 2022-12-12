@@ -1,0 +1,11 @@
+Block Name			X	Y		#Block ID
+---------------------------
+adder_0		2	6		#p0
+constant_pe		3	6		#p4
+in16		0	0		#I7
+io1_hw_output_stencil_op_hcompute_hw_output_stencil_write_valid		1	0		#i8
+lut_flush		1	2		#p10
+mem_0		2	5		#m11
+mem_1		2	1		#m12
+mem_valid		1	1		#m15
+out16		1	0		#I17
