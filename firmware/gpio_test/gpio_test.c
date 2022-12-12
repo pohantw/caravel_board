@@ -96,7 +96,7 @@ void main()
 
         reg_gpio_data = 0x0;
 
-        for (j = 0; j < 3000; j++);
+        for (j = 0; j < 30000; j++);
 
 //        reg_mprj_datal = 0x55555555;
 //       	reg_mprj_datah = 0x55555500;
@@ -109,7 +109,7 @@ void main()
         reg_gpio_data = 0x1;
 
 
-        for (j = 0; j < 3000; j++);
+        for (j = 0; j < 30000; j++);
 	}
 
 }

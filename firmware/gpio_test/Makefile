@@ -15,7 +15,7 @@ hex:  ${PATTERN:=.hex}
 
 %.hex: %.elf
 	$(TOOLCHAIN_PATH)riscv32-unknown-elf-objcopy -O verilog $< $@
-	sed -i '.orig' -e 's/@10000000/@00000000/g' $@
+	sed -i -e 's/@100/@000/g' $@
 
 %.bin: %.elf
 	$(TOOLCHAIN_PATH)riscv32-unknown-elf-objcopy -O binary $< $@
