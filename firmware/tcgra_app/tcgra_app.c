@@ -21,7 +21,8 @@
 #define dst_sram_addr_base 0x00010101 // change me according to design.place
 
 int CGRA_load_bs(int rb_chk);
-void led_signal_pass(uint32_t error, uint32_t last_rtl);
+int CGRA_load_bs_unit();
+void led_signal_pass(uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3);
 void led_signal_fail(uint32_t error, uint32_t last_rtl);
 void led_signal_fail_cfg();
 void uart_message(int status);
@@ -59,14 +60,22 @@ void main()
 	reg_gpio_pd = 0x0;
 	reg_gpio_data = 0x1;
 
+    // clear the LCD screen
+    print("|"); putchar(0x2d);
+
     // [CGRA] stall the CGRA for configuration
     reg_mprj_stall = 0xF;
 
     // [CGRA] load bitstream
-    int status = 0;
-    status = CGRA_load_bs(1);
-    if (status == 1){
-        led_signal_fail_cfg();
+    int err_cnt;
+    print("Load BS: ");
+    err_cnt = CGRA_load_bs(1);
+    if (err_cnt > 0) {
+        print("Fail, err=");
+        print_dec(err_cnt);
+        print("\n");
+    } else {
+        print("Pass\n");
     }
 
     // de-assert flush
@@ -75,6 +84,7 @@ void main()
     // pre-program sram
     uint32_t i;
     uint32_t ii;
+    print("Load SRAM: ");
     for (i=0; i<512; i++) {
         ii = i>>1; // same address write twice
         ii = ii<<24; // shift the address to [31:24]
@@ -83,6 +93,7 @@ void main()
         reg_mprj_cfg_wdata = 0x00000099; // use same data
         reg_mprj_cfg_write = 1;
     }
+    print("Done\n");
 
     // unstall the cgra
     reg_mprj_stall = 0x0;
@@ -90,12 +101,14 @@ void main()
     // create flush
     flush_set(flush_true);
     flush_set(flush_false);
+    print("CGRA starts...");
 
     // wait some time
     for(i=0; i<3000; i++);
 
     // stall cgra
     reg_mprj_stall = 0xF;
+    print("Fin!\n");
 
     // check the result SRAM
     uint32_t rtl, k;
@@ -113,23 +126,31 @@ void main()
         // if (rtl != (0x00000099*3)){
         // if (rtl != (0x00000099>>3)){
         if (rtl != (0x00000099^0x00000013)){
-            status = 1;
             error++;
         }
     }
 
     // Use LED blinking pattern to show CGRA program status
-    if (status==0) {
-        led_signal_pass(error, rtl);
-    }
-    else {
-        // led_signal_fail(error);
-        led_signal_fail(error, rtl);
+    // if (status==0) {
+    //     led_signal_pass(error, rtl, 0, 0);
+    // }
+    // else {
+    //     // led_signal_fail(error);
+    //     led_signal_fail(error, rtl);
+    // }
+
+    if (error > 0) {
+        print("#e=");
+        print_dec(error);
+        print(", r=");
+        print_hex(rtl, 8);
+    } else {
+        print("-------Pass-------");
     }
 
 }
 
-void led_signal_pass(uint32_t error, uint32_t last_rtl)
+void led_signal_pass(uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3)
 {
     char *msg[] = {
         " [CGRA] Success!!!   ",
@@ -142,9 +163,13 @@ void led_signal_pass(uint32_t error, uint32_t last_rtl)
     int N = 5;
 
 	while(1) {
-        print("|"); putchar(0x2d); // clear screen
-        print_hex(error, 4);
-        print_hex(last_rtl, 4);
+        print_hex(v0, 8);
+        print("\n");
+        print_hex(v1, 8);
+        print("\n");
+        print_hex(v2, 8);
+        print("\n");
+        print_hex(v3, 8);
 
         for (j = 0; j < 30000; j++);
         // a slow bink
@@ -222,403 +247,422 @@ void flush_set(uint32_t value)
     reg_mprj_cfg_write = 1;
 }
 
+int CGRA_load_bs_unit()
+{
+    uint32_t rtl;
+    reg_mprj_cfg_addr = 0x010A0001;
+    reg_mprj_cfg_wdata = 0x00028008;
+    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_addr = 0x010A0001;
+    reg_mprj_cfg_read = 1;
+    rtl = reg_mprj_cfg_rdata;
+
+    return (rtl != 0x00028008);
+}
+
 int CGRA_load_bs(int rb_chk)
 {
     // This is the bitstream file of : simple_mem
     // Auto generated at 11/29/2022 02:03:58
     uint32_t rtl;
     int fail = 0;
+    uint32_t err_cnt = 0;
+    uint32_t cnt = 0;
 
     // write the bitstream
     reg_mprj_cfg_addr = 0x01090301;
     reg_mprj_cfg_wdata = 0x00028008;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x01090201;
     reg_mprj_cfg_wdata = 0x00001010;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00090201;
     reg_mprj_cfg_wdata = 0x08040000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00060102;
     reg_mprj_cfg_wdata = 0x00014000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00090101;
     reg_mprj_cfg_wdata = 0x00050000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00020101;
     reg_mprj_cfg_wdata = 0x00000006;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00020201;
     reg_mprj_cfg_wdata = 0x00000006;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00060302;
     reg_mprj_cfg_wdata = 0x0000C000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00020301;
     reg_mprj_cfg_wdata = 0x00000001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x010A0001;
     reg_mprj_cfg_wdata = 0x00008000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x010A0101;
     reg_mprj_cfg_wdata = 0x00000081;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x000A0101;
     reg_mprj_cfg_wdata = 0x00018000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00050201;
     reg_mprj_cfg_wdata = 0x0000000B;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x010A0201;
     reg_mprj_cfg_wdata = 0x00003000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x000A0201;
     reg_mprj_cfg_wdata = 0x00200000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00040202;
     reg_mprj_cfg_wdata = 0x00000008;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00070203;
     reg_mprj_cfg_wdata = 0x0000C000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00050202;
     reg_mprj_cfg_wdata = 0x00000001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00070202;
     reg_mprj_cfg_wdata = 0xC8000000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00050101;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x4F000201;
     reg_mprj_cfg_wdata = 0x00100000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x38000201;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x2D000201;
     reg_mprj_cfg_wdata = 0x00000001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x30000201;
     reg_mprj_cfg_wdata = 0x000FE100;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x37000201;
     reg_mprj_cfg_wdata = 0x00000001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x49000201;
     reg_mprj_cfg_wdata = 0x00000001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x46000201;
     reg_mprj_cfg_wdata = 0x00000110;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x40000201;
     reg_mprj_cfg_wdata = 0x000000FE;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x48000201;
     reg_mprj_cfg_wdata = 0x00010002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x3F000201;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x47000201;
     reg_mprj_cfg_wdata = 0x01000000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x51000201;
     reg_mprj_cfg_wdata = 0x00000400;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x1B000101;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x29000101;
     reg_mprj_cfg_wdata = 0x00000200;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x22000101;
     reg_mprj_cfg_wdata = 0x00000FE1;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x07000101;
     reg_mprj_cfg_wdata = 0x00100000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x1A000101;
     reg_mprj_cfg_wdata = 0x00000009;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x0C000101;
     reg_mprj_cfg_wdata = 0x00010001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x09000101;
     reg_mprj_cfg_wdata = 0x00011000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x14000101;
     reg_mprj_cfg_wdata = 0x000000FE;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x13000101;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x0B000101;
     reg_mprj_cfg_wdata = 0x00000005;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x51000101;
     reg_mprj_cfg_wdata = 0x00000400;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x05000301;
     reg_mprj_cfg_wdata = 0x00000001;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x01000301;
     reg_mprj_cfg_wdata = 0x0000003C;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x04000301;
     reg_mprj_cfg_wdata = 0x00010080;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00000301;
     reg_mprj_cfg_wdata = 0x0000F880;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x03000301;
     reg_mprj_cfg_wdata = 0x00010000;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x51000301;
     reg_mprj_cfg_wdata = 0x00000400;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00000202;
     reg_mprj_cfg_wdata = 0x00800014;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x01000202;
     reg_mprj_cfg_wdata = 0x48000200;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x02000202;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x01000203;
     reg_mprj_cfg_wdata = 0x48004C00;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x02000203;
     reg_mprj_cfg_wdata = 0x00000002;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
     reg_mprj_cfg_addr = 0x00000302;
     reg_mprj_cfg_wdata = 0x001C7E00;
-    reg_mprj_cfg_write = 1;
+    reg_mprj_cfg_write = 1; cnt+=1;
+
 
     // readback check
+    err_cnt = 0;
+    cnt = 0;
     reg_mprj_cfg_addr = 0x01090301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00028008) fail = 1;
+    if(rtl != 0x00028008) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x01090201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00001010) fail = 1;
+    if(rtl != 0x00001010) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00090201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x08040000) fail = 1;
+    if(rtl != 0x08040000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00060102;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00014000) fail = 1;
+    if(rtl != 0x00014000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00090101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00050000) fail = 1;
+    if(rtl != 0x00050000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00020101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000006) fail = 1;
+    if(rtl != 0x00000006) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00020201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000006) fail = 1;
+    if(rtl != 0x00000006) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00060302;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0000C000) fail = 1;
+    if(rtl != 0x0000C000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00020301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000001) fail = 1;
+    if(rtl != 0x00000001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x010A0001;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00008000) fail = 1;
+    if(rtl != 0x00008000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x010A0101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000081) fail = 1;
+    if(rtl != 0x00000081) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x000A0101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00018000) fail = 1;
+    if(rtl != 0x00018000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00050201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0000000B) fail = 1;
+    if(rtl != 0x0000000B) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x010A0201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00003000) fail = 1;
+    if(rtl != 0x00003000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x000A0201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00200000) fail = 1;
+    if(rtl != 0x00200000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00040202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000008) fail = 1;
+    if(rtl != 0x00000008) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00070203;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0000C000) fail = 1;
+    if(rtl != 0x0000C000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00050202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000001) fail = 1;
+    if(rtl != 0x00000001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00070202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0xC8000000) fail = 1;
+    if(rtl != 0xC8000000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00050101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x4F000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00100000) fail = 1;
+    if(rtl != 0x00100000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x38000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x2D000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000001) fail = 1;
+    if(rtl != 0x00000001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x30000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x000FE100) fail = 1;
+    if(rtl != 0x000FE100) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x37000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000001) fail = 1;
+    if(rtl != 0x00000001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x49000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000001) fail = 1;
+    if(rtl != 0x00000001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x46000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000110) fail = 1;
+    if(rtl != 0x00000110) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x40000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x000000FE) fail = 1;
+    if(rtl != 0x000000FE) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x48000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00010002) fail = 1;
+    if(rtl != 0x00010002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x3F000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x47000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x01000000) fail = 1;
+    if(rtl != 0x01000000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x51000201;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000400) fail = 1;
+    if(rtl != 0x00000400) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x1B000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x29000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000200) fail = 1;
+    if(rtl != 0x00000200) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x22000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000FE1) fail = 1;
+    if(rtl != 0x00000FE1) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x07000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00100000) fail = 1;
+    if(rtl != 0x00100000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x1A000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000009) fail = 1;
+    if(rtl != 0x00000009) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x0C000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00010001) fail = 1;
+    if(rtl != 0x00010001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x09000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00011000) fail = 1;
+    if(rtl != 0x00011000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x14000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x000000FE) fail = 1;
+    if(rtl != 0x000000FE) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x13000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x0B000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000005) fail = 1;
+    if(rtl != 0x00000005) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x51000101;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000400) fail = 1;
+    if(rtl != 0x00000400) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x05000301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000001) fail = 1;
+    if(rtl != 0x00000001) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x01000301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0000003C) fail = 1;
+    if(rtl != 0x0000003C) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x04000301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00010080) fail = 1;
+    if(rtl != 0x00010080) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00000301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0000F880) fail = 1;
+    if(rtl != 0x0000F880) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x03000301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00010000) fail = 1;
+    if(rtl != 0x00010000) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x51000301;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000400) fail = 1;
+    if(rtl != 0x00000400) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00800014) fail = 1;
+    if(rtl != 0x00800014) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x01000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x48000200) fail = 1;
+    if(rtl != 0x48000200) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x02000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x01000203;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x48004C00) fail = 1;
+    if(rtl != 0x48004C00) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x02000203;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x00000002) fail = 1;
+    if(rtl != 0x00000002) {err_cnt+=1;}cnt+=1;
     reg_mprj_cfg_addr = 0x00000302;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x001C7E00) fail = 1;
+    if(rtl != 0x001C7E00) {err_cnt+=1;}cnt+=1;
 
     reg_mprj_cfg_read = 0;
-    return fail;
+
+    return err_cnt;
 
 }
