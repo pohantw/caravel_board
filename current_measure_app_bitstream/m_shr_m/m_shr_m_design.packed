@@ -1,0 +1,28 @@
+Netlists:
+e3: (m14, output_width_1_num_2)	(i7, f2io_1)
+e4: (p9, res_p)	(m11, flush)	(m10, flush)	(m14, flush)
+e7: (m10, output_width_16_num_0)	(p17, data0)
+e8: (p3, alu_res)	(p17, data1)
+e9: (p17, alu_res)	(m11, input_width_16_num_2)
+e10: (I6, io2f_16)	(m10, input_width_16_num_2)
+e11: (m11, output_width_16_num_0)	(I16, f2io_16)
+
+ID to Names:
+p3: constant_pe
+I6: in16
+i7: io1_hw_output_stencil_op_hcompute_hw_output_stencil_write_valid
+p9: lut_flush
+m10: mem_0
+m11: mem_1
+m14: mem_valid
+I16: out16
+p17: rshft_0
+
+Netlist Bus:
+e3: 1
+e4: 1
+e7: 16
+e8: 16
+e9: 16
+e10: 16
+e11: 16
