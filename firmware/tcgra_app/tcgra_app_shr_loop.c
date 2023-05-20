@@ -101,7 +101,7 @@ void main()
     // create flush
     flush_set(flush_true);
     flush_set(flush_false);
-    print("CGRA loops:mul");
+    print("CGRA loops:shr");
 
     // // wait some time
     // for(i=0; i<3000; i++);
@@ -123,8 +123,8 @@ void main()
     //     reg_mprj_cfg_read = 0;
     //     // if (rtl != (0x00000099)){
     //     // if (rtl != (0x00000099+1)){
-    //     if (rtl != (0x00000099*3)){
-    //     // if (rtl != (0x00000099>>3)){
+    //     // if (rtl != (0x00000099*3)){
+    //     if (rtl != (0x00000099>>3)){
     //     // if (rtl != (0x00000099^0x00000013)){
     //         error++;
     //     }
@@ -145,7 +145,7 @@ void main()
     //     print(", r=");
     //     print_hex(rtl, 8);
     // } else {
-    //     print("-----Pass:mul-----");
+    //     print("-----Pass:shr-----");
     // }
 
 }
@@ -262,8 +262,8 @@ int CGRA_load_bs_unit()
 
 int CGRA_load_bs(int rb_chk)
 {
-    // This is the bitstream file of : simple_mem-m_mul_m
-    // Auto generated at 05/20/2023 01:09:56
+    // This is the bitstream file of : simple_mem-m_shr_m
+    // Auto generated at 05/20/2023 01:13:49
     uint32_t rtl;
     int err_cnt = 0;
 
@@ -443,7 +443,7 @@ int CGRA_load_bs(int rb_chk)
     reg_mprj_cfg_wdata = 0x00000400;
     reg_mprj_cfg_write = 1;
     reg_mprj_cfg_addr = 0x00000202;
-    reg_mprj_cfg_wdata = 0x0080000B;
+    reg_mprj_cfg_wdata = 0x0080000F;
     reg_mprj_cfg_write = 1;
     reg_mprj_cfg_addr = 0x01000202;
     reg_mprj_cfg_wdata = 0x48000200;
@@ -697,7 +697,7 @@ int CGRA_load_bs(int rb_chk)
     reg_mprj_cfg_addr = 0x00000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0080000B) err_cnt += 1;
+    if(rtl != 0x0080000F) err_cnt += 1;
     reg_mprj_cfg_addr = 0x01000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;

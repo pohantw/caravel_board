@@ -101,7 +101,7 @@ void main()
     // create flush
     flush_set(flush_true);
     flush_set(flush_false);
-    print("CGRA loops:mul");
+    print("CGRA loops:xor");
 
     // // wait some time
     // for(i=0; i<3000; i++);
@@ -123,9 +123,9 @@ void main()
     //     reg_mprj_cfg_read = 0;
     //     // if (rtl != (0x00000099)){
     //     // if (rtl != (0x00000099+1)){
-    //     if (rtl != (0x00000099*3)){
+    //     // if (rtl != (0x00000099*3)){
     //     // if (rtl != (0x00000099>>3)){
-    //     // if (rtl != (0x00000099^0x00000013)){
+    //     if (rtl != (0x00000099^0x00000013)){
     //         error++;
     //     }
     // }
@@ -145,7 +145,7 @@ void main()
     //     print(", r=");
     //     print_hex(rtl, 8);
     // } else {
-    //     print("-----Pass:mul-----");
+    //     print("-----Pass:xor-----");
     // }
 
 }
@@ -259,11 +259,10 @@ int CGRA_load_bs_unit()
 
     return (rtl != 0x00028008);
 }
-
 int CGRA_load_bs(int rb_chk)
 {
-    // This is the bitstream file of : simple_mem-m_mul_m
-    // Auto generated at 05/20/2023 01:09:56
+    // This is the bitstream file of : simple_mem-m_xor_m
+    // Auto generated at 05/20/2023 01:17:46
     uint32_t rtl;
     int err_cnt = 0;
 
@@ -443,7 +442,7 @@ int CGRA_load_bs(int rb_chk)
     reg_mprj_cfg_wdata = 0x00000400;
     reg_mprj_cfg_write = 1;
     reg_mprj_cfg_addr = 0x00000202;
-    reg_mprj_cfg_wdata = 0x0080000B;
+    reg_mprj_cfg_wdata = 0x00800014;
     reg_mprj_cfg_write = 1;
     reg_mprj_cfg_addr = 0x01000202;
     reg_mprj_cfg_wdata = 0x48000200;
@@ -452,7 +451,7 @@ int CGRA_load_bs(int rb_chk)
     reg_mprj_cfg_wdata = 0x00000002;
     reg_mprj_cfg_write = 1;
     reg_mprj_cfg_addr = 0x01000203;
-    reg_mprj_cfg_wdata = 0x48000C00;
+    reg_mprj_cfg_wdata = 0x48004C00;
     reg_mprj_cfg_write = 1;
     reg_mprj_cfg_addr = 0x02000203;
     reg_mprj_cfg_wdata = 0x00000002;
@@ -697,7 +696,7 @@ int CGRA_load_bs(int rb_chk)
     reg_mprj_cfg_addr = 0x00000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x0080000B) err_cnt += 1;
+    if(rtl != 0x00800014) err_cnt += 1;
     reg_mprj_cfg_addr = 0x01000202;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
@@ -709,7 +708,7 @@ int CGRA_load_bs(int rb_chk)
     reg_mprj_cfg_addr = 0x01000203;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
-    if(rtl != 0x48000C00) err_cnt += 1;
+    if(rtl != 0x48004C00) err_cnt += 1;
     reg_mprj_cfg_addr = 0x02000203;
     reg_mprj_cfg_read = 1;
     rtl = reg_mprj_cfg_rdata;
